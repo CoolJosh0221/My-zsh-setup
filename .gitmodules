@@ -1,3 +1,9 @@
 [submodule "oh-my-zsh-custom/custom/plugins/wakatime"]
 	path = oh-my-zsh-custom/custom/plugins/wakatime
 	url = https://github.com/sobolevn/wakatime-zsh-plugin.git
+[submodule "oh-my-zsh-custom/custom/plugins/zsh-syntax-highlighting"]
+	path = oh-my-zsh-custom/custom/plugins/zsh-syntax-highlighting
+	url = https://github.com/zsh-users/zsh-syntax-highlighting.git
+[submodule "oh-my-zsh-custom/custom/plugins/zsh-autosuggestions"]
+	path = oh-my-zsh-custom/custom/plugins/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions.git
