@@ -110,7 +110,9 @@ plugins=(git
 	zsh-syntax-highlighting
 	zsh-autosuggestions
     shellfirm
-    wakatime)
+    wakatime
+    python
+    docker)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -158,39 +160,28 @@ source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
 source /opt/homebrew/opt/chruby/share/chruby/auto.sh
 chruby ruby-3.1.3
 
-export PATH=$PATH:/Applications/MacVim.app/Contents/bin
-export PATH="/Users/josh/.local/bin:$PATH"
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
-export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
-export CPPFLAGS="-I/opt/homebrew/opt/openjdk@17/include"
-export PATH=~/apache-maven-3.8.7/bin:$PATH
-export PATH="/opt/homebrew/opt/node@18/bin:$PATH"
+zstyle ':completion:*:*:docker:*' option-stacking yes
+zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/Users/josh/miniconda/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/Users/josh/miniconda/etc/profile.d/conda.sh" ]; then
-        . "/Users/josh/miniconda/etc/profile.d/conda.sh"
-    else
-        export PATH="/Users/josh/miniconda/bin:$PATH"
-    fi
+if [ "$(uname)" = "Darwin" ]; then
+    export PATH=$PATH:/Applications/MacVim.app/Contents/bin
+    export PATH="/Users/josh/.local/bin:$PATH"
+    export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+    export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
+    export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+    export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+    export CPPFLAGS="-I/opt/homebrew/opt/openjdk@17/include"
+    export PATH="/opt/homebrew/opt/node@18/bin:$PATH"
+    export PATH=~/apache-maven-3.8.7/bin:$PATH
+    export PATH=$PATH:/Users/josh/.spicetify
+    export PATH=$PATH:/usr/local/share/dotnet/dotnet
+    export PATH=$PATH:/Applications/kitty.app/Contents/MacOS
 fi
-unset __conda_setup
-# <<< conda initialize <<<
-
-export PATH=$PATH:/Users/josh/.spicetify
-export PATH=$PATH:/usr/local/share/dotnet/dotnet
-export PATH=$PATH:/Applications/kitty.app/Contents/MacOS
 
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 alias vim=nvim
-alias ls='exa --git --color=always --group-directories-first'
+alias ls='eza --git --color=always --group-directories-first'
 alias cd=z
 
 # Nix
@@ -198,6 +189,7 @@ if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
   . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
 fi
 # End Nix
+
 export CARGO_HTTP_MULTIPLEXING=false
 eval "$(navi widget zsh)"
 eval "$(zoxide init zsh)"
@@ -205,4 +197,40 @@ alias icat="kitty +kitten icat"
 source $HOME/.cargo/env
 export POWERLEVEL9K_TERM_SHELL_INTEGRATION=true
 
-export TERM="xterm-kitty"
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/Users/josh/mambaforge/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/Users/josh/mambaforge/etc/profile.d/conda.sh" ]; then
+        . "/Users/josh/mambaforge/etc/profile.d/conda.sh"
+    else
+        export PATH="/Users/josh/mambaforge/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+
+if [ -f "/Users/josh/mambaforge/etc/profile.d/mamba.sh" ]; then
+    . "/Users/josh/mambaforge/etc/profile.d/mamba.sh"
+fi
+# <<< conda initialize <<<
+export CXX=/usr/bin/g++
+
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+export SDKMAN_DIR="$HOME/.sdkman"
+
+# bun completions
+[ -s "/Users/josh/.bun/_bun" ] && source "/Users/josh/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="/opt/homebrew/opt/libxslt/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/libxslt/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/libxslt/include"
+
+export PATH=$PATH:/Users/josh/.pixi/bin
+eval "$(pixi completion --shell zsh)"
