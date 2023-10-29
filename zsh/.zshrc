@@ -112,7 +112,8 @@ plugins=(git
     shellfirm
     wakatime
     python
-    docker)
+    docker
+)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -176,6 +177,54 @@ if [ "$(uname)" = "Darwin" ]; then
     export PATH=$PATH:/Users/josh/.spicetify
     export PATH=$PATH:/usr/local/share/dotnet/dotnet
     export PATH=$PATH:/Applications/kitty.app/Contents/MacOS
+    # >>> conda initialize >>>
+    # !! Contents within this block are managed by 'conda init' !!
+    __conda_setup="$('/Users/josh/mambaforge/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+    if [ $? -eq 0 ]; then
+        eval "$__conda_setup"
+    else
+        if [ -f "/Users/josh/mambaforge/etc/profile.d/conda.sh" ]; then
+            . "/Users/josh/mambaforge/etc/profile.d/conda.sh"
+        else
+            export PATH="/Users/josh/mambaforge/bin:$PATH"
+        fi
+    fi
+    unset __conda_setup
+
+    if [ -f "/Users/josh/mambaforge/etc/profile.d/mamba.sh" ]; then
+        . "/Users/josh/mambaforge/etc/profile.d/mamba.sh"
+    fi
+    # <<< conda initialize <<<
+    export CXX=/usr/bin/g++
+
+
+    #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+    [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+    export SDKMAN_DIR="$HOME/.sdkman"
+
+    # bun completions
+    [ -s "/Users/josh/.bun/_bun" ] && source "/Users/josh/.bun/_bun"
+
+    # bun
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+    export PATH="/opt/homebrew/opt/libxslt/bin:$PATH"
+    export LDFLAGS="-L/opt/homebrew/opt/libxslt/lib"
+    export CPPFLAGS="-I/opt/homebrew/opt/libxslt/include"
+
+    export PATH=$PATH:/Users/josh/.pixi/bin
+    eval "$(pixi completion --shell zsh)"
+    export MODULAR_HOME="$HOME/.modular"
+    export PATH="$MODULAR_HOME/pkg/packages.modular.com_mojo/bin:$PATH"
+    eval "$(direnv hook zsh)"
+
+    # pnpm
+    export PNPM_HOME="/Users/josh/Library/pnpm"
+    case ":$PATH:" in
+      *":$PNPM_HOME:"*) ;;
+      *) export PATH="$PNPM_HOME:$PATH" ;;
+    esac
+    # pnpm end
 fi
 
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
@@ -184,12 +233,6 @@ alias vim=nvim
 alias ls='eza --git --color=always --group-directories-first'
 alias cd=z
 
-# Nix
-if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
-  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-fi
-# End Nix
-
 export CARGO_HTTP_MULTIPLEXING=false
 eval "$(navi widget zsh)"
 eval "$(zoxide init zsh)"
@@ -197,40 +240,3 @@ alias icat="kitty +kitten icat"
 source $HOME/.cargo/env
 export POWERLEVEL9K_TERM_SHELL_INTEGRATION=true
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/Users/josh/mambaforge/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/Users/josh/mambaforge/etc/profile.d/conda.sh" ]; then
-        . "/Users/josh/mambaforge/etc/profile.d/conda.sh"
-    else
-        export PATH="/Users/josh/mambaforge/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-
-if [ -f "/Users/josh/mambaforge/etc/profile.d/mamba.sh" ]; then
-    . "/Users/josh/mambaforge/etc/profile.d/mamba.sh"
-fi
-# <<< conda initialize <<<
-export CXX=/usr/bin/g++
-
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-export SDKMAN_DIR="$HOME/.sdkman"
-
-# bun completions
-[ -s "/Users/josh/.bun/_bun" ] && source "/Users/josh/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-export PATH="/opt/homebrew/opt/libxslt/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/libxslt/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/libxslt/include"
-
-export PATH=$PATH:/Users/josh/.pixi/bin
-eval "$(pixi completion --shell zsh)"

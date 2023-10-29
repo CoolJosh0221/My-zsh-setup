@@ -7,3 +7,6 @@
 [submodule "oh-my-zsh-custom/custom/plugins/zsh-autosuggestions"]
 	path = oh-my-zsh-custom/custom/plugins/zsh-autosuggestions
 	url = https://github.com/zsh-users/zsh-autosuggestions.git
+[submodule "zsh/oh-my-zsh-custom/custom/plugins/nix-shell"]
+	path = zsh/oh-my-zsh-custom/custom/plugins/nix-shell
+	url = https://github.com/chisui/zsh-nix-shell.git
