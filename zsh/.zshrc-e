@@ -155,14 +155,16 @@ POWERLEVEL9K_BATTERY_VERBOSE=false
 
 alias cls="clear"
 
+test -e /Users/josh/.iterm2_shell_integration.zsh && source /Users/josh/.iterm2_shell_integration.zsh || true
+
+source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
+source /opt/homebrew/opt/chruby/share/chruby/auto.sh
+chruby ruby-3.1.3
 
 zstyle ':completion:*:*:docker:*' option-stacking yes
 zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
 if [ "$(uname)" = "Darwin" ]; then
-    source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
-    source /opt/homebrew/opt/chruby/share/chruby/auto.sh
-    chruby ruby-3.1.3
     export PATH=$PATH:/Applications/MacVim.app/Contents/bin
     export PATH="/Users/josh/.local/bin:$PATH"
     export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
@@ -219,27 +221,54 @@ if [ "$(uname)" = "Darwin" ]; then
     # pnpm
     export PNPM_HOME="/Users/josh/Library/pnpm"
     case ":$PATH:" in
-    *":$PNPM_HOME:"*) ;;
-    *) export PATH="$PNPM_HOME:$PATH" ;;
+      *":$PNPM_HOME:"*) ;;
+      *) export PATH="$PNPM_HOME:$PATH" ;;
     esac
     # pnpm end
-
-    [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-    source /opt/homebrew/opt/modules/init/zsh
-
-    [ -f "/Users/josh/.ghcup/env" ] && . "/Users/josh/.ghcup/env" # ghcup-env
-
-    export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-
-    alias vim=nvim
-    alias ls='eza --git --color=always --group-directories-first'
-    alias cd=z
-
-    export CARGO_HTTP_MULTIPLEXING=false
-    eval "$(navi widget zsh)"
-    eval "$(zoxide init zsh)"
-    alias icat="kitty +kitten icat"
-    source $HOME/.cargo/env
-    export POWERLEVEL9K_TERM_SHELL_INTEGRATION=true
 fi
+
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+alias vim=nvim
+alias ls='eza --git --color=always --group-directories-first'
+alias cd=z
+
+export CARGO_HTTP_MULTIPLEXING=false
+eval "$(navi widget zsh)"
+eval "$(zoxide init zsh)"
+alias icat="kitty +kitten icat"
+source $HOME/.cargo/env
+export POWERLEVEL9K_TERM_SHELL_INTEGRATION=true
+
+export PATH="/opt/homebrew/opt/node@18/bin:$PATH"
+export ANDROID_HOME=~/Library/Android/sdk
+export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
+export NDK_HOME="$ANDROID_HOME/ndk/26.1.10909125/android-ndk-r26b"
+export PATH="opt/homebrew/bin/zig:$PATH"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@16/lib/pkgconfig"
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+
+. "$HOME/.asdf/asdf.sh"
+# append completions to fpath
+fpath=(${ASDF_DIR}/completions $fpath)
+# initialise completions with ZSH's compinit
+autoload -Uz compinit && compinit
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/josh/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/josh/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/josh/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/josh/google-cloud-sdk/completion.zsh.inc'; fi
+export KERL_CONFIGURE_OPTIONS="--disable-jit"
+
+# pnpm
+export PNPM_HOME="/Users/josh/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+source /opt/homebrew/opt/modules/init/zsh
