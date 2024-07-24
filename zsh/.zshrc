@@ -120,3 +120,7 @@ zstyle ':completion:*:*:docker-*:*' option-stacking yes
 if [ "$(uname)" = "Darwin" ]; then
     source ~/dotfiles/zsh/environment-macos-arm64.zsh
 fi
+export MODULAR_HOME="/Users/josh/.modular"
+export PATH="/Users/josh/.modular/pkg/packages.modular.com_max/bin:$PATH"
+
+. "$HOME/.cargo/env"

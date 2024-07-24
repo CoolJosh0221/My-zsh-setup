@@ -309,11 +309,55 @@ window.Spicetify = {
 	Platform: {}
 };
 
+(function waitForPlatform() {
+	if (!Spicetify._platform) {
+		setTimeout(waitForPlatform, 50);
+		return;
+	}
+	const { _platform } = Spicetify;
+	for (const key of Object.keys(_platform)) {
+		if (key.startsWith("get") && typeof _platform[key] === "function") {
+			Spicetify.Platform[key.slice(3)] = _platform[key]();
+		} else {
+			Spicetify.Platform[key] = _platform[key];
+		}
+	}
+
+	if (!Spicetify.Platform.Registry) Spicetify.Events.platformLoaded.fire();
+})();
+
+(function addMissingPlatformAPIs() {
+	if (!Spicetify.Platform?.version && !Spicetify.Platform?.Registry) {
+		setTimeout(addMissingPlatformAPIs, 50);
+		return;
+	}
+	const version = Spicetify.Platform.version.split(".").map(i => Number.parseInt(i));
+	if (version[0] === 1 && version[1] === 2 && version[2] < 38) return;
+
+	for (const [key, _] of Spicetify.Platform.Registry._map.entries()) {
+		if (typeof key?.description !== "string" || !key?.description.endsWith("API")) continue;
+		const symbolName = key.description;
+		if (Object.hasOwn(Spicetify.Platform, symbolName)) continue;
+		const resolvedAPI = Spicetify.Platform.Registry.resolve(key);
+		if (!resolvedAPI) {
+			console.warn(`[spicetifyWrapper] Failed to resolve PlatformAPI from Registry: ${symbolName}`);
+			continue;
+		}
+
+		Spicetify.Platform[symbolName] = resolvedAPI;
+		console.debug(`[spicetifyWrapper] Resolved PlatformAPI from Registry: ${symbolName}`);
+	}
+
+	if (Spicetify.Events.platformLoaded.callbacks.length) Spicetify.Events.platformLoaded.fire();
+})();
+
 (function addProxyCosmos() {
-	if (!Spicetify.Player.origin?._cosmos) {
+	if (!Spicetify.Player.origin?._cosmos && !Spicetify.Platform?.Registry) {
 		setTimeout(addProxyCosmos, 50);
 		return;
 	}
+
+	const _cosmos = Spicetify.Player.origin?._cosmos ?? Spicetify.Platform?.Registry.resolve(Symbol.for("Cosmos"));
 
 	const corsProxyURL = "https://cors-proxy.spicetify.app";
 	const allowedMethodsMap = {
@@ -330,7 +374,9 @@ window.Spicetify = {
 		get: (target, prop, receiver) => {
 			const internalFetch = Reflect.get(target, prop, receiver);
 
-			if (typeof internalFetch !== "function" || !allowedMethodsSet.has(prop) || Spicetify.Platform.version < "1.2.31") return internalFetch;
+			if (typeof internalFetch !== "function" || !allowedMethodsSet.has(prop)) return internalFetch;
+			const version = Spicetify.Platform.version.split(".").map(i => Number.parseInt(i));
+			if (version[0] === 1 && version[1] === 2 && version[2] < 31) return internalFetch;
 
 			return async function (url, body) {
 				const urlObj = new URL(url);
@@ -394,28 +440,12 @@ window.Spicetify = {
 		}
 	};
 
-	Spicetify.Player.origin._cosmos = new Proxy(Spicetify.Player.origin._cosmos, handler);
+	Spicetify.Player.origin._cosmos = new Proxy(_cosmos, handler);
 	Object.defineProperty(Spicetify, "CosmosAsync", {
 		get: () => {
 			return Spicetify.Player.origin?._cosmos;
 		}
 	});
-})();
-
-(function waitForPlatform() {
-	if (!Spicetify._platform) {
-		setTimeout(waitForPlatform, 50);
-		return;
-	}
-	const { _platform } = Spicetify;
-	for (const key of Object.keys(_platform)) {
-		if (key.startsWith("get") && typeof _platform[key] === "function") {
-			Spicetify.Platform[key.slice(3)] = _platform[key]();
-		} else {
-			Spicetify.Platform[key] = _platform[key];
-		}
-	}
-	Spicetify.Events.platformLoaded.fire();
 })();
 
 (function hotloadWebpackModules() {
@@ -512,10 +542,11 @@ window.Spicetify = {
 		ReactJSX: cache.find(m => m?.jsx),
 		ReactDOM: cache.find(m => m?.createPortal),
 		ReactDOMServer: cache.find(m => m?.renderToString),
-		// classnames for 1.2.13
-		classnames: cache
-			.filter(module => typeof module === "function")
-			.find(module => module.toString().includes('"string"') && module.toString().includes("[native code]")),
+		// https://github.com/JedWatson/classnames/
+		classnames: chunks
+			.filter(([_, v]) => v.toString().includes("[native code]"))
+			.map(([i]) => require(i))
+			.find(e => typeof e === "function"),
 		Color: functionModules.find(m => m.toString().includes("static fromHex") || m.toString().includes("this.rgb")),
 		Player: {
 			...Spicetify.Player,
@@ -696,11 +727,11 @@ window.Spicetify = {
 		}
 	});
 
-	// classnames
-	// https://github.com/JedWatson/classnames/
-	const classnamesChunk = chunks.find(([_, value]) => value.toString().includes("[native code]") && !value.toString().includes("<anonymous>"));
-	if (classnamesChunk && !Spicetify.classnames) {
-		Spicetify.classnames = Object.values(require(classnamesChunk[0])).find(m => typeof m === "function");
+	const confirmDialogChunk = chunks.find(
+		([, value]) => value.toString().includes("confirmDialog") && value.toString().includes("shouldCloseOnEsc") && value.toString().includes("isOpen")
+	);
+	if (!Spicetify.ReactComponent?.ConfirmDialog && confirmDialogChunk) {
+		Spicetify.ReactComponent.ConfirmDialog = Object.values(require(confirmDialogChunk[0])).find(m => typeof m === "object");
 	}
 
 	const contextMenuChunk = chunks.find(([, value]) => value.toString().includes("toggleContextMenu"));
@@ -1042,7 +1073,7 @@ Spicetify._getStyledClassName = (args, component) => {
 		}
 	}
 
-	const excludedKeys = ["children", "className", "style", "dir", "key", "ref", "as", "$autoMirror", "$hasFocus", ""];
+	const excludedKeys = ["children", "className", "style", "dir", "key", "ref", "as", "$autoMirror", "autoMirror", "$hasFocus", ""];
 	const excludedPrefix = ["aria-"];
 
 	const childrenProps = ["iconLeading", "iconTrailing", "iconOnly", "$iconOnly", "$iconLeading", "$iconTrailing"];
@@ -2391,7 +2422,7 @@ Spicetify.Playbar = (() => {
 	// Fetch latest version from GitHub
 	try {
 		let changelog;
-		const res = await fetch("https://api.github.com/repos/spicetify/spicetify-cli/releases/latest");
+		const res = await fetch("https://api.github.com/repos/spicetify/cli/releases/latest");
 		const { tag_name, html_url, body } = await res.json();
 		const semver = tag_name.slice(1);
 		const changelogRawDataOld = body.match(/## What's Changed([\s\S]*?)\r\n\r/)?.[1];

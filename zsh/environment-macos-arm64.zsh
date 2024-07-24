@@ -82,3 +82,6 @@ source $HOME/.cargo/env
 
 # Powerlevel9K terminal integration
 export POWERLEVEL9K_TERM_SHELL_INTEGRATION=true
+
+alias g++='g++-14'
+alias gcc='gcc-14'

@@ -22,7 +22,11 @@
 	 */
 	const binds = {
 		// Shutdown Spotify using Ctrl+Q
-		"ctrl+q": { callback: () => Spicetify.CosmosAsync.post("sp://esperanto/spotify.desktop.lifecycle_esperanto.proto.DesktopLifecycle/Shutdown") },
+		"ctrl+q": {
+			callback: () =>
+				Spicetify.CosmosAsync.post("sp://esperanto/spotify.desktop.lifecycle_esperanto.proto.DesktopLifecycle/Shutdown") &&
+				Spicetify.CosmosAsync.post("sp://desktop/v1/shutdown")
+		},
 
 		// Rotate through sidebar items using Ctrl+Tab and Ctrl+Shift+Tab
 		"ctrl+tab": { callback: () => rotateSidebar(1) },
@@ -55,8 +59,8 @@
 		"ctrl+right": { callback: () => Spicetify.Player.next() },
 
 		// CTRL + Arrow Up Increase Volume CTRL + Arrow Down Decrease Volume
-		"ctrl+up": { callback: () => Spicetify.Player.setVolume(Spicetify.Player.getVolume() - 0.05) },
-		"ctrl+down": { callback: () => Spicetify.Player.setVolume(Spicetify.Player.getVolume() + 0.05) },
+		"ctrl+up": { callback: () => Spicetify.Player.setVolume(Spicetify.Player.getVolume() + 0.05) },
+		"ctrl+down": { callback: () => Spicetify.Player.setVolume(Spicetify.Player.getVolume() - 0.05) },
 
 		// Activate Vim mode and set cancel key to 'ESCAPE'
 		f: {
@@ -102,7 +106,9 @@
 
 	// Functions
 	function focusOnApp() {
-		return document.querySelector(".Root__main-view .os-viewport");
+		return document.querySelector(
+			".Root__main-view .os-viewport, .Root__main-view .main-view-container > .main-view-container__scroll-node:not([data-overlayscrollbars-initialize]), .Root__main-view .main-view-container__scroll-node > [data-overlayscrollbars-viewport]"
+		);
 	}
 
 	function createScrollCallback(step) {
